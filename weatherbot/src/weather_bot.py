@@ -54,11 +54,11 @@ def reply_weather():
 
         if '#weather' in mention.full_text.lower():
             print('found the tweet')
-            city_name = 'Portland'
+            city_name = 'Chicago'
             try:
                 # needs to be updated for user input
 
-                api_address = 'https://api.openweathermap.org/data/2.5/weather?q=' + city_name + '&appid=62c7ceaaad980045d006ea4704872c79'
+                api_address =  'https://api.openweathermap.org/data/2.5/weather?q=' + city_name + secret_keys.OPEN_WEATHER_KEY
                 json_data = requests.get(api_address).json()
                 formatted_data = json_data['weather'][0]['description']
                 api.update_status('@' + mention.user.screen_name + ' The weather is ' + formatted_data, mention.id)
