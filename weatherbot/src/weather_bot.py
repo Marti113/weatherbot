@@ -3,6 +3,9 @@ import requests
 import time
 
 from os import environ
+
+from name_search import NameSearch
+
 try:
     import secret_keys
 except ImportError:
@@ -15,11 +18,13 @@ if 'CONSUMER_KEY' in environ:
     CONSUMER_SECRET= environ['CONSUMER_SECRET']
     ACCESS_KEY= environ['ACCESS_KEY']
     ACCESS_SECRET= environ['ACCESS_SECRET']
+    OPEN_WEATHER_KEY = environ['OPEN_WEATHER_KEY']
 else:
     CONSUMER_KEY = secret_keys.CONSUMER_KEY
     CONSUMER_SECRET = secret_keys.CONSUMER_SECRET
     ACCESS_KEY = secret_keys.ACCESS_KEY
     ACCESS_SECRET = secret_keys.ACCESS_SECRET
+    OPEN_WEATHER_KEY = secret_keys.OPEN_WEATHER_KEY
 
 auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
@@ -54,14 +59,16 @@ def reply_weather():
 
         if '#weather' in mention.full_text.lower():
             print('found the tweet')
-            city_name = 'Chicago'
+            city_name = NameSearch.find_place(mention.full_text)
             try:
                 # needs to be updated for user input
 
-                api_address =  'https://api.openweathermap.org/data/2.5/weather?q=' + city_name + secret_keys.OPEN_WEATHER_KEY
+                api_address = 'https://api.openweathermap.org/data/2.5/weather?q=' + city_name + OPEN_WEATHER_KEY
                 json_data = requests.get(api_address).json()
                 formatted_data = json_data['weather'][0]['description']
-                api.update_status('@' + mention.user.screen_name + ' The weather is ' + formatted_data, mention.id)
+                if '+' in city_name:
+                    city_name = NameSearch.return_city(mention.full_text)
+                api.update_status('@' + mention.user.screen_name + ' The weather in '+ city_name+' is ' + formatted_data, mention.id)
 
             except tweepy.TweepError as error:
                 print("I don't know that city, try again", error)
