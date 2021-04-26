@@ -16,6 +16,6 @@ class NameSearch:
         place = GeoText(input)
         city = place.cities[0]
         return city
-str = "The city is New York"
+#str = "The city is New York"
 
-print(NameSearch.find_place(str))
+#print(NameSearch.find_place(str))
