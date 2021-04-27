@@ -4,8 +4,10 @@ class NameSearch:
     def __init__(self, input):
         self.input = input
         place = GeoText(self.input)
-        self.city = place.cities[0]
-
+        try:
+            self.city = place.cities[0]
+        except:
+            self.city = 'Chicago'
     def find_place(self):
 
         if ' ' in self.city:

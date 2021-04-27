@@ -68,6 +68,7 @@ def reply_tweet(full_text, id, user_screen_name):
     return None
 
 def reply_weather():
+
     last_seen_id = retrieve_last_seen_id(FILE_NAME)
 
     mentions = api.mentions_timeline(
