@@ -59,22 +59,21 @@ def reply_weather():
 
         if '#weather' in mention.full_text.lower():
             print('found the tweet')
-            city_name = NameSearch.find_place(mention.full_text)
-            try:
-                # needs to be updated for user input
+            city = NameSearch(mention.full_text)
+            city_link = city.find_place()
+            city_name = city.return_city()
 
-                api_address = 'https://api.openweathermap.org/data/2.5/weather?q=' + city_name + OPEN_WEATHER_KEY
+            try:
+
+                api_address = 'https://api.openweathermap.org/data/2.5/weather?q=' + city_link + OPEN_WEATHER_KEY
                 json_data = requests.get(api_address).json()
                 formatted_data = json_data['weather'][0]['description']
-                if '+' in city_name:
-                    city_name = NameSearch.return_city(mention.full_text)
-                api.update_status('@' + mention.user.screen_name + ' The weather in '+ city_name+' is ' + formatted_data, mention.id)
+                api.update_status('@' + mention.user.screen_name + ' The weather in '+ city_name +' is ' + formatted_data, mention.id)
 
             except tweepy.TweepError as error:
                 print("I don't know that city, try again", error)
         else:
             print("You done messed up")
-            #api.update_status('@' + mention.user.screen_name + ' I need a #hike to find the city', mention.id)
 
 while True:
     reply_weather()
