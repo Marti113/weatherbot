@@ -1,6 +1,7 @@
 import tweepy
 import requests
 import time
+import argparse
 
 from os import environ
 
@@ -44,73 +45,55 @@ def store_last_seen_id(last_seen_id, file_name):
     f_write.close()
     return
 
-def reply_weather():
+def reply_tweet(full_text, id, user_screen_name):
+    print(str(id) + "-" + full_text)
 
+    if '#weather' in full_text.lower():
+        print('found the tweet')
+        city = NameSearch(full_text)
+        city_link = city.find_place()
+        city_name = city.return_city()
+        try:
+
+            api_address = 'https://api.openweathermap.org/data/2.5/weather?q=' + city_link + OPEN_WEATHER_KEY
+            json_data = requests.get(api_address).json()
+            formatted_data = json_data['weather'][0]['description']
+            status_update = '@' + user_screen_name + ' The weather in '+ city_name +' is ' + formatted_data
+            return status_update
+        except tweepy.TweepError as error:
+            print("I don't know that city, try again", error)
+    else:
+        print("No #weather in text")
+
+    return None
+
+def reply_weather():
     last_seen_id = retrieve_last_seen_id(FILE_NAME)
 
     mentions = api.mentions_timeline(
-                last_seen_id,
-                tweet_mode='extended')
+               last_seen_id,
+              tweet_mode='extended')
 
     for mention in reversed(mentions):
-        print(str(mention.id) + "-"+ mention.full_text)
+        full_text, id, user_screen_name = mention.full_text, mention.id, mention.user.screen_name
+        reply_result = reply_tweet(full_text, id, user_screen_name)
+        if reply_result is not None:
+            api.update_status(reply_result, id)
         last_seen_id = mention.id
         store_last_seen_id(last_seen_id, FILE_NAME)
 
-        if '#weather' in mention.full_text.lower():
-            print('found the tweet')
-            city = NameSearch(mention.full_text)
-            city_link = city.find_place()
-            city_name = city.return_city()
+parser = argparse.ArgumentParser(description='Twitter weather bot')
+parser.add_argument('--test', action='store_true')
+args = parser.parse_args()
+print("In test mode:", args.test)
 
-            try:
-
-                api_address = 'https://api.openweathermap.org/data/2.5/weather?q=' + city_link + OPEN_WEATHER_KEY
-                json_data = requests.get(api_address).json()
-                formatted_data = json_data['weather'][0]['description']
-                api.update_status('@' + mention.user.screen_name + ' The weather in '+ city_name +' is ' + formatted_data, mention.id)
-
-            except tweepy.TweepError as error:
-                print("I don't know that city, try again", error)
-        else:
-            print("You done messed up")
-
-while True:
-    reply_weather()
-    time.sleep(15)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+if not args.test:
+    while True:
+       reply_weather()
+       time.sleep(15)
+else:
+    result = reply_tweet("This is a test #weather tweet for Fort Lauderdale", 0, 'test_name')
+    print(result)
 
 
 
