@@ -58,7 +58,10 @@ def reply_tweet(full_text, id, user_screen_name):
             api_address = 'https://api.openweathermap.org/data/2.5/weather?q=' + city_link + OPEN_WEATHER_KEY
             json_data = requests.get(api_address).json()
             formatted_data = json_data['weather'][0]['description']
-            status_update = '@' + user_screen_name + ' The weather in '+ city_name +' is ' + formatted_data
+            formatted_temp = json_data['main']['temp']
+            temp = str(round(kelvin_to_F(formatted_temp), 1))
+            #status_update = '@' + user_screen_name + ' The weather in '+ city_name +' is ' + formatted_data + '---'+ temp + ' degrees F'
+            status_update = f"@{user_screen_name} The weather in {city_name} is {temp} degrees and {formatted_data} "
             return status_update
         except tweepy.TweepError as error:
             print("I don't know that city, try again", error)
@@ -66,6 +69,9 @@ def reply_tweet(full_text, id, user_screen_name):
         print("No #weather in text")
 
     return None
+
+def kelvin_to_F(temp):
+    return 9/5*temp -459.67
 
 def reply_weather():
 
