@@ -45,7 +45,7 @@ def store_last_seen_id(last_seen_id, file_name):
     f_write.close()
     return
 
-def reply_tweet(full_text, id, user_screen_name):
+def reply_tweet(full_text, id=0, user_screen_name='!fake_user'):
     print(str(id) + "-" + full_text)
 
     if '#weather' in full_text.lower():
@@ -60,7 +60,6 @@ def reply_tweet(full_text, id, user_screen_name):
             formatted_data = json_data['weather'][0]['description']
             formatted_temp = json_data['main']['temp']
             temp = str(round(kelvin_to_F(formatted_temp), 1))
-            #status_update = '@' + user_screen_name + ' The weather in '+ city_name +' is ' + formatted_data + '---'+ temp + ' degrees F'
             status_update = f"@{user_screen_name} The weather in {city_name} is {temp} degrees and {formatted_data} "
             return status_update
         except tweepy.TweepError as error:
@@ -99,7 +98,7 @@ if not args.test:
        reply_weather()
        time.sleep(15)
 else:
-    result = reply_tweet("This is a test #weather tweet for Fort Lauderdale", 0, 'test_name')
+    result = reply_tweet("This is a test #weather tweet for Fort Lauderdale")
     print(result)
 
 
